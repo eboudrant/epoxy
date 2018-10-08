@@ -140,8 +140,8 @@ class EpoxyVisibilityItem {
   private boolean isUnfocusedVisible(boolean detachEvent) {
     // true when the Component is no longer focused, i.e. it is not fully visible and does not
     // occupy at least half the viewport.
-    boolean unfocusedVisible = detachEvent ||
-        !(size >= viewportSize / 2 || (visibleSize == size && size < viewportSize / 2));
+    boolean unfocusedVisible = detachEvent
+        || !(size >= viewportSize / 2 || (visibleSize == size && size < viewportSize / 2));
     if (unfocusedVisible) {
       focusedVisible = false;
     }
