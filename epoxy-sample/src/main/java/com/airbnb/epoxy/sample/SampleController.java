@@ -1,10 +1,15 @@
 package com.airbnb.epoxy.sample;
 
 import com.airbnb.epoxy.AutoModel;
+import com.airbnb.epoxy.EpoxyModel;
 import com.airbnb.epoxy.TypedEpoxyController;
 import com.airbnb.epoxy.sample.models.CarouselModelGroup;
+import com.airbnb.epoxy.sample.models.ImageButtonModel_;
+import com.airbnb.epoxy.sample.models.SimpleModelGroup;
 import com.airbnb.epoxy.sample.views.HeaderViewModel_;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static com.airbnb.epoxy.EpoxyAsyncUtil.getAsyncBackgroundHandler;
@@ -43,11 +48,16 @@ public class SampleController extends TypedEpoxyController<List<CarouselData>> {
 
   @Override
   protected void buildModels(List<CarouselData> carousels) {
+
+    addSimpleModelGroup();
+
     header
         .title(R.string.epoxy)
         .caption(R.string.header_subtitle);
     // "addTo" is not needed since implicit adding is enabled
     // (https://github.com/airbnb/epoxy/wiki/Epoxy-Controller#implicit-adding)
+
+
 
     addButton
         .textRes(R.string.button_add)
@@ -74,6 +84,30 @@ public class SampleController extends TypedEpoxyController<List<CarouselData>> {
       CarouselData carousel = carousels.get(i);
       add(new CarouselModelGroup(carousel, callbacks));
     }
+  }
+
+  private void addSimpleModelGroup() {
+
+    // SimpleModelGroup use
+
+    Collection<ImageButtonModel_> models = new ArrayList<>();
+    models.add(new ImageButtonModel_()
+        .id("ImageButtonModel_-0")
+        .imageRes(R.drawable.ic_change)
+    );
+    models.add(new ImageButtonModel_()
+        .id("ImageButtonModel_-1")
+        .imageRes(R.drawable.ic_add_circle)
+    );
+    models.add(new ImageButtonModel_()
+        .id("ImageButtonModel_-2")
+        .imageRes(R.drawable.ic_add_circle)
+    );
+    models.add(new ImageButtonModel_()
+        .id("ImageButtonModel_-3")
+        .imageRes(R.drawable.ic_add_circle)
+    );
+    new SimpleModelGroup(models).addTo(this);
   }
 
   @Override
