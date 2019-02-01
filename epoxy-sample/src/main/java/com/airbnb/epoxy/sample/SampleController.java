@@ -49,7 +49,7 @@ public class SampleController extends TypedEpoxyController<List<CarouselData>> {
   @Override
   protected void buildModels(List<CarouselData> carousels) {
 
-    addSimpleModelGroup();
+
 
     header
         .title(R.string.epoxy)
@@ -84,12 +84,11 @@ public class SampleController extends TypedEpoxyController<List<CarouselData>> {
       CarouselData carousel = carousels.get(i);
       add(new CarouselModelGroup(carousel, callbacks));
     }
+
+    addSimpleModelGroup();
   }
 
   private void addSimpleModelGroup() {
-
-    // SimpleModelGroup use
-
     Collection<ImageButtonModel_> models = new ArrayList<>();
     models.add(new ImageButtonModel_()
         .id("ImageButtonModel_-0")

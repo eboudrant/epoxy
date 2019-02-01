@@ -7,8 +7,13 @@ import com.airbnb.epoxy.sample.R;
 import java.util.Collection;
 
 public class SimpleModelGroup extends EpoxyModelGroup {
-  
+
   public SimpleModelGroup(Collection<? extends EpoxyModel<?>> models) {
     super(R.layout.simple_model_group, models);
+  }
+
+  @Override
+  public int getSpanSize(int totalSpanCount, int position, int itemCount) {
+    return 2;
   }
 }

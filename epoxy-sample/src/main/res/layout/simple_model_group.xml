@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <!-- Title treatment -->
+    <!-- First element -->
     <ViewStub
         android:layout_width="60dp"
         android:layout_height="60dp" />
@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1" />
 
-    <!-- And up to 3 CTAs -->
+    <!-- And up to 3 elements -->
     <ViewStub
         android:layout_width="60dp"
         android:layout_height="60dp" />
