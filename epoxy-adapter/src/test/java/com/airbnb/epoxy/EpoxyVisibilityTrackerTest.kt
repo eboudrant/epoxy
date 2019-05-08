@@ -75,7 +75,7 @@ class EpoxyVisibilityTrackerTest {
     private var viewportHeight: Int = 0
     private var itemHeight: Int = 0
 
-    private val epoxyVisibilityTracker = EpoxyVisibilityTracker()
+    private lateinit var testedEpoxyVisibilityTracker: EpoxyVisibilityTracker
 
     /**
      * Test visibility events when loading a recycler view
@@ -634,6 +634,82 @@ class EpoxyVisibilityTrackerTest {
     }
 
     /**
+     * Test visibility events when loading a recycler view but this time with `onChangedEnabled` set
+     * to false. The result should not contains values for visibleHeight / percentVisibleHeight
+     */
+    @Test
+    fun testOnChangedFalse() {
+
+        // set onChangedEnabled to false
+        testedEpoxyVisibilityTracker.onChangedEnabled = false
+        val valueNotChanged = 0f
+
+        val testHelper = buildTestData(10, TWO_AND_HALF_VISIBLE)
+
+        val firstHalfVisibleItem = 2
+        val firstInvisibleItem = firstHalfVisibleItem + 1
+
+        // Verify visibility event
+        testHelper.forEachIndexed { index, helper ->
+            when {
+
+                index in 0 until firstHalfVisibleItem -> {
+
+                    // Item expected to be 100% visible
+
+                    with(helper) {
+                        assert(
+                            visibleHeight = valueNotChanged.toInt(),
+                            percentVisibleHeight = valueNotChanged,
+                            visible = true,
+                            fullImpression = true,
+                            visitedStates = intArrayOf(
+                                VISIBLE,
+                                FOCUSED_VISIBLE,
+                                FULL_IMPRESSION_VISIBLE
+                            )
+                        )
+                    }
+                }
+
+                index == firstHalfVisibleItem -> {
+
+                    // Item expected to be 50% visible
+
+                    with(helper) {
+                        assert(
+                            visibleHeight = valueNotChanged.toInt(),
+                            percentVisibleHeight = valueNotChanged,
+                            visible = true,
+                            fullImpression = false,
+                            visitedStates = intArrayOf(VISIBLE)
+                        )
+                    }
+                }
+
+                index in firstInvisibleItem..9 -> {
+
+                    // Item expected not to be visible
+
+                    with(helper) {
+                        assert(
+                            visibleHeight = valueNotChanged.toInt(),
+                            percentVisibleHeight = valueNotChanged,
+                            visible = false,
+                            fullImpression = false,
+                            visitedStates = intArrayOf()
+                        )
+                    }
+                }
+
+                else -> throw IllegalStateException("index should not be bigger than 9")
+            }
+
+            log("$index valid")
+        }
+    }
+
+    /**
      * Attach an EpoxyController on the RecyclerView
      */
     private fun buildTestData(
@@ -685,7 +761,9 @@ class EpoxyVisibilityTrackerTest {
     fun setup() {
         Robolectric.setupActivity(Activity::class.java).apply {
             setContentView(EpoxyRecyclerView(this).apply {
-                epoxyVisibilityTracker.attach(this)
+                testedEpoxyVisibilityTracker = EpoxyVisibilityTracker().also {
+                    it.attach(this)
+                }
                 recyclerView = this
                 // Plug an epoxy controller
                 epoxyController = object : TypedEpoxyController<List<AssertHelper>>() {
@@ -711,7 +789,7 @@ class EpoxyVisibilityTrackerTest {
 
     @After
     fun tearDown() {
-        epoxyVisibilityTracker.detach(recyclerView)
+        testedEpoxyVisibilityTracker.detach(recyclerView)
     }
 
     /**
