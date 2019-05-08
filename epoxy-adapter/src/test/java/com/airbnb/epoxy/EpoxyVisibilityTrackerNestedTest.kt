@@ -4,7 +4,6 @@ import android.app.Activity
 import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.airbnb.epoxy.EpoxyVisibilityTracker.DEBUG_LOG
 import com.airbnb.epoxy.VisibilityState.INVISIBLE
 import com.airbnb.epoxy.VisibilityState.VISIBLE
 import org.junit.After
@@ -39,7 +38,7 @@ class EpoxyVisibilityTrackerNestedTest {
         private const val ONE_AND_HALF_VISIBLE = 1.5f
 
         private fun log(message: String) {
-            if (DEBUG_LOG) {
+            if (EpoxyVisibilityTracker.DEBUG_LOG) {
                 Log.d(TAG, message)
             }
         }
