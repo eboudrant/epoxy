@@ -22,6 +22,8 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLog
+import org.robolectric.shadows.ShadowLooper
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * This class test the EpoxyVisibilityTracker by using a RecyclerView that scroll vertically. The
@@ -90,9 +92,8 @@ class EpoxyVisibilityTrackerTest {
 
         // Verify visibility event
         testHelper.forEachIndexed { index, helper ->
-            when {
-
-                index in 0 until firstHalfVisibleItem -> {
+            when (index) {
+                in 0 until firstHalfVisibleItem -> {
 
                     // Item expected to be 100% visible
 
@@ -110,8 +111,7 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
-                index == firstHalfVisibleItem -> {
+                firstHalfVisibleItem -> {
 
                     // Item expected to be 50% visible
 
@@ -125,8 +125,7 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
-                index in firstInvisibleItem..9 -> {
+                in firstInvisibleItem..9 -> {
 
                     // Item expected not to be visible
 
@@ -140,11 +139,21 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
                 else -> throw IllegalStateException("index should not be bigger than 9")
             }
 
             log("$index valid")
+        }
+    }
+
+    @Test
+    fun testKotlin() {
+        val map = ConcurrentHashMap<String, String>()
+        map.put("1", "2")
+        map.put("3", "4")
+        map.put("5", "6")
+        map.keys.forEach {
+            map.remove(it)
         }
     }
 
@@ -432,9 +441,8 @@ class EpoxyVisibilityTrackerTest {
 
         // Verify visibility event
         testHelper.forEachIndexed { index, helper ->
-            when {
-
-                index in 0..1 -> {
+            when (index) {
+                in 0..1 -> {
 
                     // Item expected not to be visible but should have visited all states
 
@@ -448,8 +456,7 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
-                index == 2 -> {
+                2 -> {
 
                     // This item was only half visible, it was never fully visible
 
@@ -463,8 +470,7 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
-                index in 3..6 -> {
+                in 3..6 -> {
 
                     // Theses items were never rendered
 
@@ -478,8 +484,7 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
-                index == 7 -> {
+                7 -> {
 
                     // Item expected to be 50% visible
 
@@ -498,8 +503,7 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
-                index in 8..9 -> {
+                in 8..9 -> {
 
                     // Item expected to be 100% visible
 
@@ -541,9 +545,8 @@ class EpoxyVisibilityTrackerTest {
 
         // Verify visibility event
         testHelper.forEachIndexed { index, helper ->
-            when {
-
-                index in 0..1 -> {
+            when (index) {
+                in 0..1 -> {
 
                     // Item expected not to be visible but should have visited all states
 
@@ -563,8 +566,7 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
-                index == 2 -> {
+                2 -> {
 
                     // This item was only half visible, it was never fully visible
 
@@ -578,8 +580,7 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
-                index in 3..6 -> {
+                in 3..6 -> {
 
                     // Theses items were never rendered
 
@@ -593,8 +594,7 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
-                index == 7 -> {
+                7 -> {
 
                     // Item expected to be 50% visible
 
@@ -608,8 +608,7 @@ class EpoxyVisibilityTrackerTest {
                         )
                     }
                 }
-
-                index in 8..9 -> {
+                in 8..9 -> {
 
                     // Item expected to be 100% visible
 
@@ -648,6 +647,7 @@ class EpoxyVisibilityTrackerTest {
         // This block will validate five full impression and one 30% impression. We just want to
         // validate that onVisibilityChanged is sent only once after rebuild (no scrolling).
         val validateFivePlusPeek: (MutableList<AssertHelper>) -> Unit = { testHelper ->
+
             testHelper.forEachIndexed { index, helper ->
                 when (index) {
                     in 0..5 -> {
@@ -697,6 +697,7 @@ class EpoxyVisibilityTrackerTest {
         sampleSize: Int,
         visibleItemsOnScreen: Float
     ): MutableList<AssertHelper> {
+
         // Compute individual item height
         itemHeight = (recyclerView.measuredHeight / visibleItemsOnScreen).toInt()
         // Build a test sample of sampleSize items
@@ -704,7 +705,16 @@ class EpoxyVisibilityTrackerTest {
             for (index in 0 until sampleSize) add(AssertHelper(ids++))
         }
         log(helpers.ids())
+
+        log("-------------- ShadowLooper.getShadowMainLooper().pause()")
+        ShadowLooper.getShadowMainLooper().pause()
+        log("-------------- setData($sampleSize)")
         epoxyController.setData(helpers)
+        log("-------------- ShadowLooper.getShadowMainLooper().runOneTask()")
+        ShadowLooper.getShadowMainLooper().runOneTask()
+        log("-------------- ShadowLooper.getShadowMainLooper().unPause()")
+        ShadowLooper.getShadowMainLooper().unPause()
+
         return helpers
     }
 
@@ -792,6 +802,7 @@ class EpoxyVisibilityTrackerTest {
         }
 
         override fun onVisibilityChanged(ph: Float, pw: Float, vh: Int, vw: Int, view: View) {
+            log("onVisibilityChanged[$itemPosition](id=${helper.id}) ph=$ph pw=$pw")
             helper.percentVisibleHeight = ph
             helper.percentVisibleWidth = pw
             helper.visibleHeight = vh

@@ -1,5 +1,8 @@
 package com.airbnb.epoxy;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -15,6 +18,7 @@ import java.util.Map;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver;
@@ -63,7 +67,7 @@ public class EpoxyVisibilityTracker {
   }
 
   // Not actionable at runtime. It is only useful for internal test-troubleshooting.
-  static final boolean DEBUG_LOG = false;
+  static final boolean DEBUG_LOG = true;
 
   /** Maintain visibility item indexed by view id (identity hashcode) */
   private final SparseArray<EpoxyVisibilityItem> visibilityIdToItemMap = new SparseArray<>();
@@ -88,6 +92,33 @@ public class EpoxyVisibilityTracker {
   /** This flag is for optimizing the process on detach. If detach is from data changed then it
    * need to re-process all views, else no need (ex: scroll). */
   private boolean visibleDataChanged = false;
+
+  @NonNull
+  private final Handler handler;
+
+  public EpoxyVisibilityTracker() {
+    this(Looper.getMainLooper());
+  }
+
+  private static final int UPDATE_VISIBILITY = 0;
+
+  EpoxyVisibilityTracker(@NonNull Looper looper) {
+    handler = new Handler(looper) {
+      @Override
+      public void handleMessage(Message msg) {
+        if (msg.what == UPDATE_VISIBILITY) {
+          Log.d(TAG, "processChangeEvent visibility !!!!");
+          processChangeEvent("?");
+        }
+      }
+    };
+  }
+
+  private void invalidateUpdate() {
+    Log.d(TAG, "invalidateUpdate !!!!");
+    handler.removeMessages(UPDATE_VISIBILITY);
+    handler.sendEmptyMessage(UPDATE_VISIBILITY);
+  }
 
   /**
    * Enable or disable visibility changed event. Default is `true`, disable it if you don't need
@@ -314,23 +345,28 @@ public class EpoxyVisibilityTracker {
         int left, int top, int right, int bottom,
         int oldLeft, int oldTop, int oldRight, int oldBottom
     ) {
-      processChangeEvent("onLayoutChange");
+      Log.d(TAG, "onLayoutChange: " + recyclerView);
+      invalidateUpdate();
     }
 
     @Override
     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-      processChangeEvent("onScrolled");
+      Log.d(TAG, "onScrolled: " + recyclerView);
+      invalidateUpdate();
     }
 
     @Override
     public void onChildViewAttachedToWindow(@NonNull View child) {
+      Log.d(TAG, "onChildViewAttachedToWindow: " + child);
       if (child instanceof RecyclerView) {
         processChildRecyclerViewAttached((RecyclerView) child);
       }
+      invalidateUpdate();
     }
 
     @Override
     public void onChildViewDetachedFromWindow(@NonNull View child) {
+      Log.d(TAG, "onChildViewDetachedFromWindow: " + child);
       if (child instanceof RecyclerView) {
         processChildRecyclerViewDetached((RecyclerView) child);
       }
@@ -342,6 +378,7 @@ public class EpoxyVisibilityTracker {
       } else {
         processChild(child, true, "onChildViewDetachedFromWindow");
       }
+//      invalidateUpdate();
     }
   }
 
